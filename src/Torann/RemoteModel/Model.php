@@ -4,6 +4,7 @@ namespace Torann\RemoteModel;
 
 use DateTime;
 use ArrayAccess;
+use Illuminate\Support\Str;
 use JsonSerializable;
 use Jenssegers\Date\Date;
 use Illuminate\Support\Arr;
@@ -312,7 +313,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function getEndpoint()
     {
         if (is_null($this->endpoint)) {
-            $this->endpoint = str_replace('\\', '', snake_case(str_plural(class_basename($this))));
+            $this->endpoint = str_replace('\\', '', Str::snake(Str::plural(class_basename($this))));
         }
 
         return $this->endpoint;
@@ -352,7 +353,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         foreach ($attributes as $key => $value) {
             $this->setAttribute($key, $value);
         }
-
         return $this;
     }
 
@@ -425,16 +425,16 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function paginateHydrate($result, $modelClass = null)
     {
         // Get values
-        $pagination = array_get($result, 'pagination', []);
-        $items = array_get($result, 'items', []);
+        $pagination = Arr::get($result, 'pagination', []);
+        $items = Arr::get($result, 'items', []);
         $page = LengthAwarePaginator::resolveCurrentPage();
 
         // Set pagination
-        $perPage = array_get($pagination, 'perPage', array_get($pagination, 'per_page', 15));
-        $total = array_get($pagination, 'total', null);
+        $perPage = Arr::get($pagination, 'perPage', Arr::get($pagination, 'per_page', 15));
+        $total = Arr::get($pagination, 'total', null);
 
         // Set options
-        $options = is_array($result) ? array_except($result, [
+        $options = is_array($result) ? Arr::except($result, [
             'pagination',
             'items',
             'next',
@@ -868,7 +868,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         }, $this->toApi());
 
         // Remove dynamic params
-        return array_except($params, array_merge([static::CREATED_AT, static::UPDATED_AT], [
+        return Arr::except($params, array_merge([static::CREATED_AT, static::UPDATED_AT], [
             'id',
             'pagination',
         ]));
@@ -891,7 +891,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function getErrors()
     {
-        return $this->messageBag ? array_get($this->messageBag, 'errors') : false;
+        return $this->messageBag ? Arr::get($this->messageBag, 'errors') : false;
     }
 
     /**
@@ -901,7 +901,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function getErrorCode()
     {
-        return $this->messageBag ? array_get($this->messageBag, 'code') : 200;
+        return $this->messageBag ? Arr::get($this->messageBag, 'code') : 200;
     }
 
     /**
@@ -1341,7 +1341,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function hasGetMutator($key)
     {
-        return method_exists($this, 'get' . studly_case($key) . 'Attribute');
+        return method_exists($this, 'get' . Str::studly($key) . 'Attribute');
     }
 
     /**
@@ -1353,7 +1353,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     protected function mutateAttribute($key, $value)
     {
-        return $this->{'get' . studly_case($key) . 'Attribute'}($value);
+        return $this->{'get' . Str::studly($key) . 'Attribute'}($value);
     }
 
     /**
@@ -1465,10 +1465,14 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         // which simply lets the developers tweak the attribute as it is set on
         // the model, such as "json_encoding" an listing of data for storage.
         if ($this->hasSetMutator($key)) {
-            return $this->{'set' . studly_case($key) . 'Attribute'}($value);
+            return $this->{'set' . Str::studly($key) . 'Attribute'}($value);
         }
 
-        $this->attributes[$key] = $value;
+        if (is_array($value)) {
+            $this->attributes[$key] = json_encode($value);
+        } else {
+            $this->attributes[$key] = $value;
+        }
     }
 
     /**
@@ -1479,7 +1483,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function hasSetMutator($key)
     {
-        return method_exists($this, 'set' . studly_case($key) . 'Attribute');
+        return method_exists($this, 'set' . Str::studly($key) . 'Attribute');
     }
 
     /**
@@ -1647,7 +1651,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
                 preg_match('/^get(.+)Attribute$/', $method, $matches)
             ) {
                 if (static::$snakeAttributes) {
-                    $matches[1] = snake_case($matches[1]);
+                    $matches[1] = Str::snake($matches[1]);
                 }
 
                 $mutatedAttributes[] = lcfirst($matches[1]);
@@ -1704,7 +1708,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function getParentKey()
     {
-        return snake_case(class_basename($this)) . 'ID';
+        return Str::snake(class_basename($this)) . 'ID';
     }
 
     /**
@@ -1823,7 +1827,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $name = get_called_class();
 
-        app('events')->listen("eloquent.{$event}: {$name}", $callback, $priority);
+//        app('events')->listen("eloquent.{$event}: {$name}", $callback, $priority);
+        Event::listen("eloquent.{$event}: {$name}", $callback, $priority);
     }
 
     /**
@@ -1855,7 +1860,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
         $method = $halt ? 'until' : 'fire';
 
-        return app('events')->$method($event, $this);
+//        return app('events')->$method($event, $this);
+//        return event($event); // FIXME: event method not available
     }
 
     /**
