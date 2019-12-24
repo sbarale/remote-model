@@ -1,5 +1,5 @@
 {
-  "name": "torann/remote-model",
+  "name": "renardeau/remote-model",
   "description": "An eloquent-like model, for the Laravel framework.",
   "keywords": ["laravel","eloquent","model","api","remote data","custom models"],
   "license": "BSD-2-Clause",
