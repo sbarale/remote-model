@@ -1827,8 +1827,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $name = get_called_class();
 
-//        app('events')->listen("eloquent.{$event}: {$name}", $callback, $priority);
-        Event::listen("eloquent.{$event}: {$name}", $callback, $priority);
+        app('events')->listen("eloquent.{$event}: {$name}", $callback, $priority);
+//        Event::listen("eloquent.{$event}: {$name}", $callback, $priority);
     }
 
     /**
