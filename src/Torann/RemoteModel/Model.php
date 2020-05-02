@@ -783,6 +783,11 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             $params
         ]);
 
+        // Update failed
+        if (is_array($results) === false) {
+            return false;
+        }
+
         if ($results) {
             // Update model with new data
             $this->fill($results);
@@ -841,7 +846,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             $this->getKey()
         ]);
 
-        // Creation failed
+        // Deletion failed
         if (!$results) {
             return false;
         }
