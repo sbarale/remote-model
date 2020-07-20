@@ -7,7 +7,7 @@ This model provides an eloquent-like base class that can be used to build custom
 Install using composer:
 
 ```
-$ composer require torann/remote-model
+$ composer require sbarale/remote-model
 ```
 
 ## Clients
