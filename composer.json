@@ -1,12 +1,12 @@
 {
-  "name": "deelbaarmechelen/remote-model",
+  "name": "sbarale/remote-model",
   "description": "An eloquent-like model, for the Laravel framework.",
   "keywords": ["laravel","eloquent","model","api","remote data","custom models"],
   "license": "BSD-2-Clause",
   "authors": [
     {
-      "name": "Daniel Stainback",
-      "email": "torann@gmail.com"
+      "name": "Sebas Inar",
+      "email": "sebasinar@gmail.com"
     }
   ],
   "require": {
